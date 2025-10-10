@@ -1,0 +1,52 @@
+{
+  "Abrasions": {
+    "ten_viet": "Trầy xước",
+    "mo_ta": "Trầy xước là tổn thương nông trên bề mặt da, thường xảy ra khi da bị cọ xát mạnh với bề mặt thô ráp (như ngã xe, va quệt trên mặt đường). Vết thương thường chỉ ảnh hưởng đến lớp biểu bì và trung bì nông, gây đau rát, rớm máu và dễ bị nhiễm trùng do bụi bẩn bám vào.",
+    "so_cuu": "1. Rửa tay sạch bằng xà phòng hoặc dung dịch sát khuẩn.\n2. Rửa vết thương bằng nước sạch hoặc nước muối sinh lý để loại bỏ bụi bẩn.\n3. Nếu có dị vật bám sâu cần loại bỏ nhẹ nhàng bằng nhíp vô trùng.\n4. Sát trùng bằng dung dịch povidone-iod hoặc cồn y tế pha loãng.\n5. Che phủ bằng gạc sạch để tránh nhiễm trùng.\n6. Thay băng hàng ngày, theo dõi dấu hiệu nhiễm trùng (sưng, đỏ, chảy mủ)."
+  },
+  "Bruises": {
+    "ten_viet": "Bầm tím",
+    "mo_ta": "Bầm tím là hiện tượng chảy máu dưới da do mạch máu nhỏ bị vỡ sau va đập, té ngã hoặc chấn thương. Máu tụ lại dưới da tạo nên vết tím, có thể kèm theo sưng và đau khi ấn vào.",
+    "so_cuu": "1. Ngay sau chấn thương: chườm lạnh (túi đá bọc khăn) trong 10–15 phút, lặp lại nhiều lần trong 24 giờ đầu để giảm sưng và chảy máu.\n2. Sau 24 giờ: có thể chườm ấm nhẹ giúp máu tụ tan nhanh hơn.\n3. Kê cao vùng bị thương nếu ở chi thể để giảm sưng.\n4. Tránh xoa bóp mạnh vì có thể làm tổn thương nặng hơn.\n5. Nếu bầm tím quá rộng, đau dữ dội, hoặc kèm gãy xương → đi khám bác sĩ."
+  },
+  "Burns": {
+    "ten_viet": "Bỏng",
+    "mo_ta": "Bỏng là tổn thương da và mô do tác nhân nhiệt (lửa, nước sôi), hóa chất (axit, kiềm), điện hoặc bức xạ. Mức độ bỏng được chia thành: bỏng nông (đỏ rát, phồng rộp nhẹ), bỏng trung bì (phồng rộp, đau nhiều) và bỏng sâu (cháy sém, mất cảm giác).",
+    "so_cuu": "1. Nhanh chóng đưa nạn nhân ra khỏi nguồn gây bỏng.\n2. Làm mát ngay vùng bỏng dưới vòi nước mát (15–25°C) trong 10–20 phút, không dùng nước đá trực tiếp.\n3. Loại bỏ quần áo, trang sức quanh vết bỏng nhưng không gỡ phần dính chặt vào da.\n4. Không chọc vỡ bóng nước, không bôi kem, thuốc mỡ hay nước mắm, kem đánh răng.\n5. Che phủ bằng gạc vô trùng hoặc vải sạch.\n6. Nếu bỏng rộng (>10% cơ thể), bỏng mặt, bỏng do điện hoặc hóa chất → đưa ngay đến bệnh viện."
+  },
+  "Cut": {
+    "ten_viet": "Vết cắt",
+    "mo_ta": "Vết cắt là tổn thương da và mô bên dưới do vật sắc nhọn (dao, thủy tinh, kim loại). Vết thương có thể nông (chỉ rách da) hoặc sâu (tổn thương mạch máu, thần kinh, gân cơ).",
+    "so_cuu": "1. Dùng gạc sạch hoặc khăn sạch ấn trực tiếp để cầm máu.\n2. Rửa vết thương bằng nước sạch hoặc nước muối sinh lý sau khi máu đã giảm.\n3. Sát trùng bằng dung dịch povidone-iod.\n4. Che phủ bằng gạc vô trùng.\n5. Nếu vết cắt sâu, dài >2cm, máu chảy nhiều không cầm được, hoặc do vật bẩn → đến cơ sở y tế để khâu và tiêm phòng uốn ván."
+  },
+  "Diabetic Wounds": {
+    "ten_viet": "Loét tiểu đường",
+    "mo_ta": "Loét tiểu đường thường xuất hiện ở bàn chân bệnh nhân đái tháo đường do lưu thông máu kém và tổn thương thần kinh ngoại biên. Vết loét lâu lành, dễ nhiễm trùng, có nguy cơ hoại tử phải cắt cụt chi.",
+    "so_cuu": "1. Vệ sinh vết loét hàng ngày bằng nước muối sinh lý, tránh dùng dung dịch gây kích ứng mạnh.\n2. Che phủ bằng gạc vô trùng, thay băng thường xuyên.\n3. Tránh đi lại nhiều, giảm tì đè lên vết loét.\n4. Kiểm soát đường huyết tốt bằng thuốc và chế độ ăn.\n5. Đến bệnh viện chuyên khoa để được chăm sóc vết thương và dùng kháng sinh nếu có nhiễm trùng."
+  },
+  "Laseration": {
+    "ten_viet": "Vết rách",
+    "mo_ta": "Vết rách là tổn thương da và mô mềm bị xé rách, mép vết thương thường không đều, có thể gây chảy máu nhiều và dễ nhiễm trùng.",
+    "so_cuu": "1. Cầm máu ngay bằng gạc hoặc khăn sạch.\n2. Rửa nhẹ vết thương bằng nước muối sinh lý để loại bỏ bụi bẩn.\n3. Sát trùng xung quanh vết thương.\n4. Che phủ bằng gạc vô trùng.\n5. Vết rách thường cần khâu để mau lành, do đó nên đưa đến cơ sở y tế.\n6. Tiêm phòng uốn ván nếu vết thương do vật bẩn, gỉ sét."
+  },
+  "Normal": {
+    "ten_viet": "Bình thường",
+    "mo_ta": "Không có vết thương đáng kể, da lành lặn, không tổn thương.",
+    "so_cuu": "Không cần sơ cứu."
+  },
+  "Pressure Wounds": {
+    "ten_viet": "Loét tì đè",
+    "mo_ta": "Loét tì đè xảy ra khi vùng da và mô mềm bị chèn ép lâu dài giữa xương và bề mặt cứng (thường gặp ở bệnh nhân nằm lâu, liệt). Vết loét thường ở lưng, gót chân, mông và dễ bị nhiễm trùng.",
+    "so_cuu": "1. Thay đổi tư thế 2 giờ/lần để giảm áp lực.\n2. Giữ vùng da khô ráo, sạch sẽ.\n3. Rửa vết loét bằng nước muối sinh lý, lau khô.\n4. Che phủ bằng gạc vô trùng, dùng đệm chống loét.\n5. Bổ sung dinh dưỡng và protein đầy đủ.\n6. Đưa đến bệnh viện nếu loét sâu hoặc nhiễm trùng nặng."
+  },
+  "Surgical Wounds": {
+    "ten_viet": "Vết mổ",
+    "mo_ta": "Vết mổ là vết rạch phẫu thuật đã được khâu hoặc đóng bằng ghim. Đây là vết thương sạch nhưng có nguy cơ nhiễm trùng nếu chăm sóc không đúng.",
+    "so_cuu": "1. Giữ băng vết mổ khô, sạch, không tháo khi chưa có hướng dẫn.\n2. Thay băng theo lịch của bác sĩ hoặc khi băng ướt/bẩn.\n3. Tránh vận động mạnh gây căng chỉ khâu.\n4. Theo dõi dấu hiệu nhiễm trùng: sưng, đỏ, chảy dịch, sốt.\n5. Nếu có dấu hiệu bất thường cần tái khám ngay."
+  },
+  "Venous Wounds": {
+    "ten_viet": "Loét tĩnh mạch",
+    "mo_ta": "Loét tĩnh mạch là vết loét mạn tính thường gặp ở cẳng chân do suy tĩnh mạch mạn tính. Vết loét lâu lành, dễ tái phát, gây đau nhức và nhiễm trùng.",
+    "so_cuu": "1. Nâng cao chân khi nằm để giảm áp lực tĩnh mạch.\n2. Sử dụng băng ép hoặc vớ y khoa theo chỉ định để cải thiện tuần hoàn.\n3. Rửa vết loét bằng nước muối sinh lý, giữ sạch và khô.\n4. Che phủ bằng gạc vô trùng, thay băng hàng ngày.\n5. Duy trì vận động nhẹ nhàng.\n6. Điều trị chuyên khoa mạch máu để kiểm soát nguyên nhân và ngừa tái phát."
+  }
+}

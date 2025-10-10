@@ -1,2 +1,8 @@
 streamlit
 opencv-python-headless
+numpy
+pandas
+pillow
+tensorflow
+streamlit-mic-recorder
+google-generativeai

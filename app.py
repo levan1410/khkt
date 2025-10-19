@@ -338,24 +338,22 @@ with tab2:
     # Danh sách gợi ý thuốc theo loại vết thương
     # Danh sách gợi ý thuốc theo loại vết thương
     DRUG_SUGGESTIONS = {
-        # 3 loại đã có
-        "vết trầy xước": [ # Khớp với Abrasions
+        # Các loại cũ (giữ nguyên)
+        "vết trầy xước": [ # Khớp với Abrasions (ten_viet: "Trầy xước")
             {"item": "Betadine 10%", "why": "Sát khuẩn vết thương", "how": "Rửa nhẹ 2–3 lần/ngày", "note": "Tránh dùng quá nhiều"},
             {"item": "Gạc vô trùng", "why": "Bảo vệ vùng tổn thương", "how": "Thay mỗi 12h", "note": "Giữ khô"}
         ],
-        "bỏng nhẹ": [ # Khớp với Burns (nếu là bỏng nhẹ)
+        "bỏng nhẹ": [ # Khớp với Burns (ten_viet: "Bỏng")
             {"item": "Silvirin cream 1%", "why": "Chống nhiễm khuẩn, làm dịu da", "how": "Bôi mỏng 1–2 lần/ngày", "note": "Chỉ dùng ngoài da"},
             {"item": "NaCl 0.9%", "why": "Làm sạch vết bỏng", "how": "Rửa nhẹ trước khi bôi thuốc", "note": ""}
         ],
-        "vết cắt nhẹ": [ # Khớp với Cut (nếu là cắt nhẹ)
+        "vết cắt nhẹ": [ # Khớp với Cut (ten_viet: "Vết cắt")
             {"item": "Oxy già 3%", "why": "Rửa vết thương ban đầu", "how": "Chỉ dùng 1 lần đầu tiên", "note": "Không lạm dụng"},
             {"item": "Mỡ kháng sinh (Fucidin, Tetracycline)", "why": "Ngừa nhiễm trùng", "how": "Bôi mỏng ngày 2 lần", "note": ""}
         ],
-
-        # 7 loại cần bổ sung (ví dụ)
-        # Bạn cần tự định nghĩa nội dung gợi ý cho các loại này
         
-        "vết bầm": [ # Khớp với Bruises
+        # 7 loại bổ sung
+        "vết bầm": [ # Khớp với Bruises (ten_viet: "Bầm tím")
             {"item": "Chườm lạnh", "why": "Giảm sưng, co mạch", "how": "Chườm 10-15 phút, vài lần/ngày (24h đầu)", "note": "Không chườm đá trực tiếp lên da"},
             {"item": "Chườm nóng", "why": "Tan máu bầm", "how": "Sau 24-48h", "note": ""}
         ],
@@ -367,9 +365,13 @@ with tab2:
             {"item": "Gạc ép cầm máu", "why": "Cầm máu ban đầu", "how": "Ép chặt và giữ", "note": "Vết rách sâu/rộng cần đi khâu"},
             {"item": "Băng dán (nếu nông)", "why": "Bảo vệ", "how": "Sau khi sát khuẩn", "note": ""}
         ],
-        "da lành": [ # Khớp với Normal
+        
+        # ---- ĐÃ SỬA LẠI CHỖ NÀY ----
+        "Bình thường": [ # Khớp với Normal (ten_viet: "Bình thường")
             {"item": "Kem dưỡng ẩm", "why": "Duy trì sức khỏe da", "how": "Hàng ngày", "note": "Không cần can thiệp y tế"}
         ],
+        # ---- HẾT PHẦN SỬA ----
+
         "loét tì đè": [ # Khớp với Pressure Wounds
             {"item": "Gạc xốp (foam dressing)", "why": "Giảm áp lực, hút dịch", "how": "Theo chỉ định", "note": "Quan trọng nhất là thay đổi tư thế thường xuyên"},
             {"item": "Đệm chống loét", "why": "Phân tán áp lực", "how": "Sử dụng cho bệnh nhân", "note": ""}
@@ -383,6 +385,8 @@ with tab2:
             {"item": "Gạc tẩm bạc (nếu nhiễm trùng)", "why": "Diệt khuẩn", "how": "Theo chỉ định", "note": ""}
         ]
     }
+
+
 
     # Hàm chuẩn hóa chuỗi
     def normalize_str(s: str):

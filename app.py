@@ -9,12 +9,41 @@ import json
 import pandas as pd
 from datetime import datetime, date
 import os, io, re, requests
+import unicodedata
+import difflib
 from streamlit_mic_recorder import mic_recorder
 import google.generativeai as genai
 import urllib.parse as _u
 
 # ============ PAGE CONFIG ============
 st.set_page_config(page_title="AI Sơ cứu & Dị ứng", layout="wide")
+import streamlit as st
+
+st.sidebar.header("👤 Thông tin người dùng")
+
+with st.sidebar.form("user_info_form"):
+    name = st.text_input("Họ và tên")
+    age = st.number_input("Tuổi", min_value=0, max_value=120, value=25)
+    gender = st.selectbox("Giới tính", ["Nam", "Nữ", "Khác"])
+    city = st.text_input("Tỉnh/Thành phố hiện tại", placeholder="VD: TP. Hồ Chí Minh")
+    district = st.text_input("Quận/Huyện", placeholder="VD: Quận 1")
+    ward = st.text_input("Phường/Xã", placeholder="VD: Phường Bến Nghé")
+    health_condition = st.text_area("Tình trạng sức khỏe (nếu có)", 
+                                    placeholder="VD: Tiểu đường, tim mạch, dị ứng thuốc...")
+
+    submitted = st.form_submit_button("✅ Lưu thông tin")
+
+if submitted:
+    st.session_state.user_info = {
+        "Họ tên": name,
+        "Tuổi": age,
+        "Giới tính": gender,
+        "Tỉnh/Thành phố": city,
+        "Quận/Huyện": district,
+        "Phường/Xã": ward,
+        "Tình trạng sức khỏe": health_condition
+    }
+    st.success("Đã lưu thông tin! 🎉")
 
 # ============ HÀM NHÚNG YOUTUBE ============
 def render_youtube(url, height=460):
@@ -177,6 +206,11 @@ if "wound_records" not in st.session_state:
     st.session_state.wound_records = []
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+# lưu kết quả dự đoán gần nhất (label, info, confidence)
+if "last_prediction" not in st.session_state:
+    st.session_state.last_prediction = None
+if "user_info" not in st.session_state:
+    st.session_state.user_info = {}
 
 # ================== TABS ==================
 tabs = st.tabs([
@@ -184,8 +218,10 @@ tabs = st.tabs([
     "💊 Thuốc OTC / Kê đơn",
     "🤖 Bác sĩ AI",
     "📊 Thống kê",
+    "🌦️ Thời tiết & Gợi ý chăm sóc",
+
 ])
-tab1, tab2, tab3, tab4 = tabs
+tab1, tab2, tab3, tab4 ,tab5= tabs
 
 # ================== TAB 1: ẢNH VẾT THƯƠNG ==================
 with tab1:
@@ -202,6 +238,13 @@ with tab1:
         # Dự đoán
         label, confidence, scores = predict_image(image)
         info = wound_info[label]
+        # Lưu kết quả dự đoán vào session để các tab khác có thể dùng
+        st.session_state.last_prediction = {
+            "label": label,
+            "info": info,
+            "confidence": confidence,
+            "scores": scores
+        }
 
         left, right = st.columns([1, 1])
 
@@ -288,59 +331,131 @@ with tab1:
         st.info("Hãy chọn một ảnh để bắt đầu chẩn đoán và ghi nhật ký.")
 
 # ================== TAB 2: GỢI Ý THUỐC + MUA ONLINE (Long Châu) + Phân loại ==================
+# ================== TAB 2: GỢI Ý THUỐC + MUA ONLINE (Long Châu) + Phân loại ==================
 with tab2:
-    st.header("💊 Gợi ý mua & Phân loại thuốc / thiết bị")
-    SUGGEST_BY_NEED = {
-        "Dị ứng mũi/da nhẹ": [
-            {"item":"Loratadine 10 mg", "why":"dị ứng theo mùa/viêm mũi dị ứng", "how":"1 viên/ngày", "note":"ít gây buồn ngủ", "lc_link":"https://nhathuoclongchau.com.vn/tim-kiem?q=loratadine%2010mg"},
-            {"item":"Cetirizine 10 mg", "why":"dị ứng/ ngứa da", "how":"1 viên/ngày", "note":"tối có thể buồn ngủ", "lc_link":"https://nhathuoclongchau.com.vn/tim-kiem?q=cetirizine%2010mg"},
-            {"item":"Sodium cromoglicate 2% (nhỏ mắt)", "why":"ngứa/đỏ mắt dị ứng", "how":"1–2 giọt", "note":"không thay kháng sinh", "lc_link":"https://nhathuoclongchau.com.vn/tim-kiem?q=sodium%20cromoglicate%202%25"},
-            {"item":"Nước muối NaCl 0.9%", "why":"rửa mũi/mắt", "how":"xịt/nhỏ theo nhu cầu", "note":"", "lc_link":"https://nhathuoclongchau.com.vn/tim-kiem?q=nacl%200.9%25"}
+    st.header("💊 Gợi ý & Phân loại thuốc/thiết bị")
+
+    # Danh sách gợi ý thuốc theo loại vết thương
+    # Danh sách gợi ý thuốc theo loại vết thương
+    DRUG_SUGGESTIONS = {
+        # 3 loại đã có
+        "vết trầy xước": [ # Khớp với Abrasions
+            {"item": "Betadine 10%", "why": "Sát khuẩn vết thương", "how": "Rửa nhẹ 2–3 lần/ngày", "note": "Tránh dùng quá nhiều"},
+            {"item": "Gạc vô trùng", "why": "Bảo vệ vùng tổn thương", "how": "Thay mỗi 12h", "note": "Giữ khô"}
         ],
-        "Đau/ sốt nhẹ": [
-            {"item":"Paracetamol 500 mg", "why":"giảm đau–hạ sốt", "how":"1 viên mỗi 6–8 giờ", "note":"tránh rượu/thuốc khác", "lc_link":"https://nhathuoclongchau.com.vn/tim-kiem?q=paracetamol%20500mg"},
-            {"item":"Ibuprofen 200 mg", "why":"đau viêm nhẹ", "how":"200–400 mg mỗi 6–8 giờ", "note":"dạ dày/ thai kỳ", "lc_link":"https://nhathuoclongchau.com.vn/tim-kiem?q=ibuprofen%20200mg"}
+        "bỏng nhẹ": [ # Khớp với Burns (nếu là bỏng nhẹ)
+            {"item": "Silvirin cream 1%", "why": "Chống nhiễm khuẩn, làm dịu da", "how": "Bôi mỏng 1–2 lần/ngày", "note": "Chỉ dùng ngoài da"},
+            {"item": "NaCl 0.9%", "why": "Làm sạch vết bỏng", "how": "Rửa nhẹ trước khi bôi thuốc", "note": ""}
         ],
+        "vết cắt nhẹ": [ # Khớp với Cut (nếu là cắt nhẹ)
+            {"item": "Oxy già 3%", "why": "Rửa vết thương ban đầu", "how": "Chỉ dùng 1 lần đầu tiên", "note": "Không lạm dụng"},
+            {"item": "Mỡ kháng sinh (Fucidin, Tetracycline)", "why": "Ngừa nhiễm trùng", "how": "Bôi mỏng ngày 2 lần", "note": ""}
+        ],
+
+        # 7 loại cần bổ sung (ví dụ)
+        # Bạn cần tự định nghĩa nội dung gợi ý cho các loại này
+        
+        "vết bầm": [ # Khớp với Bruises
+            {"item": "Chườm lạnh", "why": "Giảm sưng, co mạch", "how": "Chườm 10-15 phút, vài lần/ngày (24h đầu)", "note": "Không chườm đá trực tiếp lên da"},
+            {"item": "Chườm nóng", "why": "Tan máu bầm", "how": "Sau 24-48h", "note": ""}
+        ],
+        "loét tiểu đường": [ # Khớp với Diabetic Wounds
+            {"item": "Gạc chuyên dụng (hydrocolloid...)", "why": "Duy trì môi trường ẩm, bảo vệ", "how": "Theo chỉ định BS", "note": "Cần kiểm soát đường huyết!"},
+            {"item": "Dung dịch sát khuẩn (Betadine/NaCl)", "why": "Làm sạch", "how": "Rửa nhẹ nhàng", "note": "Tuyệt đối tuân thủ chỉ định y tế"}
+        ],
+        "vết rách": [ # Khớp với Laceration
+            {"item": "Gạc ép cầm máu", "why": "Cầm máu ban đầu", "how": "Ép chặt và giữ", "note": "Vết rách sâu/rộng cần đi khâu"},
+            {"item": "Băng dán (nếu nông)", "why": "Bảo vệ", "how": "Sau khi sát khuẩn", "note": ""}
+        ],
+        "da lành": [ # Khớp với Normal
+            {"item": "Kem dưỡng ẩm", "why": "Duy trì sức khỏe da", "how": "Hàng ngày", "note": "Không cần can thiệp y tế"}
+        ],
+        "loét tì đè": [ # Khớp với Pressure Wounds
+            {"item": "Gạc xốp (foam dressing)", "why": "Giảm áp lực, hút dịch", "how": "Theo chỉ định", "note": "Quan trọng nhất là thay đổi tư thế thường xuyên"},
+            {"item": "Đệm chống loét", "why": "Phân tán áp lực", "how": "Sử dụng cho bệnh nhân", "note": ""}
+        ],
+        "vết mổ": [ # Khớp với Surgical Wounds
+            {"item": "Gạc vô trùng", "why": "Bảo vệ vết khâu", "how": "Thay băng theo chỉ định", "note": "Giữ khô tuyệt đối (trừ khi được phép)"},
+            {"item": "Dung dịch Povidine-Iodine", "why": "Sát khuẩn khi thay băng", "how": "Theo hướng dẫn của BS", "note": ""}
+        ],
+        "loét tĩnh mạch": [ # Khớp với Venous Wounds
+            {"item": "Băng ép (vớ y khoa)", "why": "Tăng cường lưu thông máu về tim", "how": "Đeo hàng ngày", "note": "Cần thăm khám chuyên khoa"},
+            {"item": "Gạc tẩm bạc (nếu nhiễm trùng)", "why": "Diệt khuẩn", "how": "Theo chỉ định", "note": ""}
+        ]
     }
 
-    need = st.selectbox("Chọn nhu cầu:", list(SUGGEST_BY_NEED.keys()))
-    if need:
-        items = SUGGEST_BY_NEED[need]
-        for it in items:
-            st.write(f"• **{it['item']}** — {it['why']}"
-                     + (f" | Cách dùng: _{it.get('how','')}_ " if it.get('how') else "")
-                     + (f" | ⚠️ {it.get('note','')}" if it.get('note') else ""))
-            if it.get("lc_link"):
-                st.markdown(f"[🛒 Mua tại Long Châu]({it['lc_link']})")
+    # Hàm chuẩn hóa chuỗi
+    def normalize_str(s: str):
+        s = (s or "").lower()
+        s = unicodedata.normalize("NFKD", s)
+        s = "".join(ch for ch in s if not unicodedata.combining(ch))
+        s = re.sub(r"[^a-z0-9\s]", " ", s)
+        s = re.sub(r"\s+", " ", s).strip()
+        return s
 
-    st.caption("Lưu ý: Thông tin tham khảo — hãy hỏi dược sĩ để được tư vấn phù hợp.")
+    # Lấy loại vết thương từ dự đoán hoặc chọn thủ công
+    last = st.session_state.get("last_prediction")
+    mapped_key = None
+    pred_conf = None
+    if last is not None:
+        raw = last.get("info", {}).get("ten_viet", "")
+        pred_conf = float(last.get("confidence", 0)) if last.get("confidence") is not None else None
+        norm_pred = normalize_str(raw)
+        norm_map = {normalize_str(k): k for k in DRUG_SUGGESTIONS.keys()}
+
+        if norm_pred in norm_map:
+            mapped_key = norm_map[norm_pred]
+        else:
+            for nk, orig in norm_map.items():
+                if nk in norm_pred or norm_pred in nk:
+                    mapped_key = orig
+                    break
+            if mapped_key is None:
+                matches = difflib.get_close_matches(norm_pred, list(norm_map.keys()), n=1, cutoff=0.6)
+                if matches:
+                    mapped_key = norm_map[matches[0]]
+
+    if mapped_key:
+        src = f"AI ({pred_conf*100:.1f}% tin cậy)" if pred_conf is not None else "AI"
+        st.caption(f"Loại vết thương: {mapped_key} (Nguồn: {src})")
+        wound_type = mapped_key
+    else:
+        wound_type = st.selectbox("Chọn loại vết thương:", list(DRUG_SUGGESTIONS.keys()))
+
+    # Hiển thị gợi ý thuốc
+    found = False
+    for key, suggestions in DRUG_SUGGESTIONS.items():
+        if key == wound_type:
+            found = True
+            st.subheader("Gợi ý sử dụng:")
+            for s in suggestions:
+                with st.container():
+                    st.markdown(f"**{s['item']}**: {s['why']} | *{s['how']}*")
+                    if s.get("note"):
+                        st.caption(f"⚠️ Lưu ý: {s['note']}")
+            break
+
+    if not found:
+        st.info("Hiện chưa có gợi ý cụ thể cho loại vết thương này.")
+
+    st.caption("Thông tin mang tính tham khảo. Hãy tham khảo ý kiến bác sĩ/dược sĩ trước khi sử dụng.")
     st.divider()
 
-    # --- Phân loại OTC/Rx gọn ---
-    st.subheader("🔎 Phân loại hoạt chất: OTC hay Rx")
-    drug_q = st.text_input("Nhập tên **hoạt chất** hoặc **kết hợp** (vd: paracetamol 500mg + loratadine)")
-    col_rx1, col_rx2 = st.columns([1,1])
-
-    with col_rx1:
-        if st.button("Phân loại"):
-            if not drug_q.strip():
-                st.warning("Vui lòng nhập tên thuốc/hoạt chất.")
-            else:
-                res = classify_rx_otc(drug_q)
-                st.subheader(f"Kết quả: {res['status']}")
-                if res["hits"]:
-                    for a, lab, note in res["hits"]:
-                        st.write(f"- **{a}** → **{lab}**")
-                if res["status"] == "OTC":
-                    lc_q = _u.quote_plus(drug_q)
-                    st.markdown(f"[🛒 Mua online tại Long Châu](https://nhathuoclongchau.com.vn/tim-kiem?q={lc_q})")
-                else:
-                    st.info("⛑️ Thuốc kê đơn/không chắc: hỏi dược sĩ hoặc bác sĩ trước khi mua/dùng.")
-
-    with col_rx2:
-        st.info("Không chắc liều/đối tượng dùng? Hãy hỏi **dược sĩ** tại nhà thuốc gần nhất.")
-        st.markdown("[🌐 Tra cứu chính thức (DAV)](https://dav.gov.vn/tra-cuu-thuoc.html)")
-
+    # Tra cứu cơ sở y tế
+    with st.container():
+        st.subheader("🏥 Cơ sở y tế gần bạn")
+        city = (st.session_state.get("user_info", {}).get("Tỉnh/Thành phố", "") or "").strip()
+        if city:
+            st.write(f"🔎 Tra cứu bệnh viện gần: **{city}**")
+            # Sửa lỗi URL Google Maps, tránh các domain không an toàn
+            # Chuyển https://www.google.com/maps/search/bệnh+viện+gần+...
+            # thành https://www.google.com/maps/search/?api=1&query=...
+            query_encoded = _u.quote(f"bệnh viện tại {city}")
+            gmap_url = f"https://www.google.com/maps/search/?api=1&query={query_encoded}"
+            st.markdown(f"[📍 Mở Google Maps]({gmap_url})")
+        else:
+            st.warning("⚠️ Vui lòng cập nhật Tỉnh/Thành phố trong hồ sơ.")
+        st.markdown("[🌐 Tra cứu thuốc (DAV)](https://dav.gov.vn/tra-cuu-thuoc.html)")
 # ================== TAB 3: BÁC SĨ AI (CHAT) ==================
 with tab3:
     st.header("🤖 Tư vấn AI - Bác sĩ ảo")
@@ -358,7 +473,7 @@ with tab3:
 
         try:
             response = requests.post(
-                "https://belle-buyer-refuse-performing.trycloudflare.com",
+                "http://localhost:11434/api/generate",
                 json={"model": "gemma:2b", "prompt": user_input, "stream": False},
                 timeout=60
             )
@@ -463,3 +578,68 @@ with tab4:
         csv_all = dff.to_csv(index=False).encode("utf-8-sig")
         st.download_button("⬇️ Tải dữ liệu đã lọc (CSV)", data=csv_all,
          file_name="thong_ke_wound_records.csv", mime="text/csv")
+# ================== TAB 5: THỜI TIẾT & GỢI Ý CHĂM SÓC ==================
+with tab5:
+    st.header("🌦️ Thời tiết & Gợi ý chăm sóc sức khỏe")
+
+    # Lấy sẵn từ sidebar nếu có
+    city_tt = (st.session_state.user_info.get("Tỉnh/Thành phố", "") or "").strip()
+    city_tt = st.text_input(
+        "Nhập Tỉnh/Thành phố để xem thời tiết",
+        value=city_tt,
+        placeholder="VD: Hà Nội, Đà Nẵng, TP. Hồ Chí Minh"
+    )
+
+    if city_tt:
+        with st.spinner(f"Đang cập nhật thời tiết tại {city_tt}..."):
+            try:
+                q_city = _u.quote(city_tt)
+                url = f"https://wttr.in/{q_city}?format=j1"
+                data = requests.get(url, timeout=10).json()
+
+                cur = data["current_condition"][0]
+                temp = float(cur["temp_C"])
+                feels_like = float(cur["FeelsLikeC"])
+                humidity = int(cur["humidity"])
+                desc = cur["weatherDesc"][0]["value"]
+
+                st.markdown(f"### 📍 {city_tt}")
+                colA, colB = st.columns(2)
+                with colA:
+                    st.metric("🌡️ Nhiệt độ (°C)", f"{temp:.1f}", delta=f"Cảm giác: {feels_like:.1f}°C")
+                with colB:
+                    st.metric("💧 Độ ẩm (%)", f"{humidity}%")
+                st.write(f"**Mô tả:** {desc}")
+
+                # Gợi ý chăm sóc rất cơ bản
+                if "mưa" in desc.lower() or "rain" in desc.lower():
+                    suggestion = "Mang áo mưa/ô, giày chống trượt; lau khô người sớm."
+                elif temp <= 20:
+                    suggestion = "Mặc ấm, uống nước ấm; tránh gió lạnh buổi sáng."
+                elif temp >= 33:
+                    suggestion = "Uống đủ nước, tránh nắng gắt; bôi chống nắng khi ra ngoài."
+                elif humidity >= 85:
+                    suggestion = "Độ ẩm cao: giữ khô thoáng, phơi đồ kỹ, chú ý da/nấm."
+                else:
+                    suggestion = "Thời tiết dễ chịu; duy trì ăn ngủ điều độ."
+
+                st.success(f"💡 Gợi ý chăm sóc: {suggestion}")
+
+                # Đồ dùng nên chuẩn bị (ngắn gọn)
+                items = []
+                if "mưa" in desc.lower() or "rain" in desc.lower():
+                    items += ["Áo mưa/ô", "Khăn lau khô"]
+                if temp <= 20:
+                    items += ["Áo khoác ấm", "Khẩu trang"]
+                if temp >= 33:
+                    items += ["Mũ/nón", "Kem chống nắng", "Bình nước"]
+                if not items:
+                    items = ["Khẩu trang", "Nước uống"]
+
+                st.markdown("**🧳 Gợi ý mang theo:** " + ", ".join(items))
+                st.caption("Nguồn: wttr.in (thời gian thực)")
+
+            except Exception as e:
+                st.error(f"Không lấy được dữ liệu thời tiết: {e}")
+    else:
+        st.info("Nhập Tỉnh/Thành phố để xem thời tiết và gợi ý chăm sóc.")

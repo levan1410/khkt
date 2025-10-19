@@ -477,7 +477,7 @@ with tab3:
 
         try:
             response = requests.post(
-                "http://localhost:11434/api/generate",
+                "http://171.234.13.136:11434/api/generate",
                 json={"model": "gemma:2b", "prompt": user_input, "stream": False},
                 timeout=60
             )
